@@ -51,6 +51,7 @@ describe('create', () => {
       name,
       completed: false,
     });
+    expect(new Set(todos.map(item => item.id)).size).toEqual(todos.length);
   });
 
   it('handle case without req.body', () => {
