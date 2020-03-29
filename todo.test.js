@@ -3,11 +3,6 @@
 
 const todo = require('./todo');
 
-const todos = [
-  { id: 1, name: 'shower', completed: false },
-  { id: 2, name: 'shopping', completed: false },
-];
-
 let req;
 let res;
 
@@ -34,18 +29,28 @@ describe('list', () => {
   it('works', () => {
     todo.list(req, res);
 
-    expect(res.json).toHaveBeenCalledTimes(1);
-    expect(res.json).toHaveBeenCalledWith(todos);
+    const todos = todo.getTodos();
+    expectStatus(200);
+    expectResponse(todos);
   });
 });
 
 describe('create', () => {
   it('works', () => {
-    req.body = { name: 'lunch' };
+    const name = 'lunch';
+    const todos = todo.getTodos();
+    const { length } = todos;
+
+    req.body = { name };
     todo.create(req, res);
 
     expectStatus(200);
-    expectResponse('Create: lunch');
+    expectResponse(todos[todos.length - 1]);
+    expect(todos).toHaveLength(length + 1);
+    expect(todos[todos.length - 1]).toMatchObject({
+      name,
+      completed: false,
+    });
   });
 
   it('handle case without req.body', () => {

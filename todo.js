@@ -10,6 +10,8 @@ function createTodo(name) {
 }
 let todos = [createTodo('shower'), createTodo('shopping')];
 
+exports.getTodos = () => todos;
+
 function respondWithError(res, errorMsg) {
   res.status(400);
   res.json({ error: errorMsg });
@@ -31,8 +33,9 @@ exports.create = (req, res) => {
   if (name === '') {
     return respondWithError(res, 'Name should not be empty');
   }
-  todos.push(createTodo(name));
-  return res.json(`Create: ${name}`);
+  const todo = createTodo(name);
+  todos.push(todo);
+  return res.json(todo);
 };
 
 exports.change = (req, res) => {
