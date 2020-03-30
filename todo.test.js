@@ -1,5 +1,7 @@
 // it - pojedynczy test
 // describe - grupa testów
+// describe.skip & it.skip - skip these tests
+// only - call only this test
 
 const todo = require('./todo');
 
@@ -18,9 +20,12 @@ function expectResponse(json) {
 }
 
 beforeEach(() => {
-  req = {};
+  req = {
+    params: {},
+  };
   res = {
     json: jest.fn(),
+    send: jest.fn(),
     status: jest.fn(),
   };
 });
@@ -88,6 +93,76 @@ describe('create', () => {
   it('handle case when name is not a string', () => {
     req.body = { name: 100 };
     todo.create(req, res);
+
+    expectStatus(400);
+    expectResponse({ error: 'Name should be a string' });
+  });
+});
+
+describe('change', () => {
+  const id = 100;
+  const name = 'bath';
+  const nextName = 'dinner';
+
+  it('works', () => {
+    //create new todo
+    todo.addTodo(todo.createTodo(name, id));
+    const todos = todo.getTodos();
+    const { length } = todos;
+
+    req.params.id = id;
+    req.body = { name: nextName };
+    todo.change(req, res);
+
+    const newTodo = todos.find(item => item.id === id);
+
+    expectStatus(200);
+    expectResponse(newTodo);
+    expect(todos).toHaveLength(length);
+    expect(newTodo).toMatchObject({
+      name: nextName,
+    });
+  });
+
+  it('handle case without req.body', () => {
+    req.params.id = id;
+    todo.change(req, res);
+
+    expectStatus(400);
+    expectResponse({ error: 'Name is missing' });
+  });
+
+  it('handle case without req.body.name', () => {
+    req.params.id = id;
+    req.body = {};
+    todo.change(req, res);
+
+    expectStatus(400);
+    expectResponse({ error: 'Name is missing' });
+  });
+
+  it('handle case when req.body.name is empty string', () => {
+    req.params.id = id;
+    req.body = { name: '' };
+    todo.change(req, res);
+
+    expectStatus(400);
+    expectResponse({ error: 'Name should not be empty' });
+  });
+
+  it('handle case when req.body.name is empty string with only spaces', () => {
+    req.params.id = id;
+    req.body = { name: '    ' };
+    todo.change(req, res);
+
+    expectStatus(400);
+    expectResponse({ error: 'Name should not be empty' });
+  });
+
+  it('handle case when name is not a string', () => {
+    req.params.id = id;
+    req.body = { name: 100 };
+    todo.change(req, res);
 
     expectStatus(400);
     expectResponse({ error: 'Name should be a string' });

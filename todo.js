@@ -1,27 +1,31 @@
 let todoId = 1;
+
 function getId() {
   const currentId = todoId;
   todoId += 1;
   return currentId;
 }
-function createTodo(name) {
-  const id = getId();
+
+function createTodo(name, id = getId()) {
   return { id, name, completed: false };
 }
+
 let todos = [createTodo('shower'), createTodo('shopping')];
 
+function addTodo(todo) {
+  todos.push(todo);
+}
+
 exports.getTodos = () => todos;
+exports.createTodo = createTodo;
+exports.addTodo = addTodo;
 
 function respondWithError(res, errorMsg) {
   res.status(400);
   res.json({ error: errorMsg });
 }
 
-exports.list = (req, res) => {
-  res.json(todos);
-};
-
-exports.create = (req, res) => {
+function verifyName(req, res) {
   if (!req.body || !req.body.hasOwnProperty('name')) {
     return respondWithError(res, 'Name is missing');
   }
@@ -33,13 +37,28 @@ exports.create = (req, res) => {
   if (name === '') {
     return respondWithError(res, 'Name should not be empty');
   }
-  const todo = createTodo(name);
-  todos.push(todo);
-  return res.json(todo);
+  return { name };
+}
+
+exports.list = (req, res) => {
+  res.json(todos);
+};
+
+exports.create = (req, res) => {
+  const name = verifyName(req, res);
+  if (!name) return;
+  const todo = createTodo(name.name);
+  addTodo(todo);
+  res.json(todo);
 };
 
 exports.change = (req, res) => {
-  res.json(`Change: ${req.params.id}`);
+  const name = verifyName(req, res);
+  if (!name) return;
+  const todo = todos.find(item => item.id === req.params.id);
+  todo.name = name.name;
+
+  res.json(todo);
 };
 
 exports.delete = (req, res) => {
