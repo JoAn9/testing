@@ -17,6 +17,13 @@ function expectStatus(status) {
 function expectResponse(json) {
   expect(res.json).toHaveBeenCalledTimes(1);
   expect(res.json).toHaveBeenCalledWith(json);
+  expect(res.send).not.toHaveBeenCalled();
+}
+
+function expectTextResponse(text) {
+  expect(res.send).toHaveBeenCalledTimes(1);
+  expect(res.send).toHaveBeenCalledWith(text);
+  expect(res.json).not.toHaveBeenCalled();
 }
 
 beforeEach(() => {
@@ -122,6 +129,15 @@ describe('change', () => {
     expect(newTodo).toMatchObject({
       name: nextName,
     });
+  });
+
+  it('handle case with not proper id', () => {
+    req.params.id = 'something';
+    req.body = { name: nextName };
+    todo.change(req, res);
+
+    expectStatus(404);
+    expectTextResponse('Not found');
   });
 
   it('handle case without req.body', () => {
