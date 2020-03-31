@@ -22,5 +22,5 @@ it('handle not found page', async () => {
 
   expect(response.status).toEqual(404);
   // expect(response.text).toMatchSnapshot();
-  expect(response.text).toEqual('not found');
+  expect(response.text).toEqual('Not found');
 });

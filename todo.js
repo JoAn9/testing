@@ -1,3 +1,5 @@
+const { respondNotFound, respondWithError } = require('./utils');
+
 let todoId = 1;
 
 function getId() {
@@ -19,11 +21,6 @@ function addTodo(todo) {
 exports.getTodos = () => todos;
 exports.createTodo = createTodo;
 exports.addTodo = addTodo;
-
-function respondWithError(res, errorMsg) {
-  res.status(400);
-  res.json({ error: errorMsg });
-}
 
 function verifyName(req, res) {
   if (!req.body || !req.body.hasOwnProperty('name')) {
@@ -56,8 +53,10 @@ exports.change = (req, res) => {
   const name = verifyName(req, res);
   if (!name) return;
   const todo = todos.find(item => item.id === req.params.id);
+  if (typeof todo === 'undefined') {
+    return respondNotFound(res);
+  }
   todo.name = name.name;
-
   res.json(todo);
 };
 

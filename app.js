@@ -2,6 +2,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 
 const todo = require('./todo');
+const { respondNotFound } = require('./utils');
 
 const app = express();
 
@@ -15,8 +16,7 @@ app.delete('/:id', todo.delete);
 app.post('/:id/toggle', todo.toggle);
 
 app.get('*', (req, res) => {
-  res.status(404);
-  res.send('not found');
+  respondNotFound(res);
 });
 
 app.use((error, req, res, next) => {
