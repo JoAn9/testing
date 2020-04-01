@@ -37,6 +37,10 @@ function verifyName(req, res) {
   return { name };
 }
 
+function findTodo(id) {
+  return todos.find(item => item.id === id);
+}
+
 exports.list = (req, res) => {
   res.json(todos);
 };
@@ -52,7 +56,7 @@ exports.create = (req, res) => {
 exports.change = (req, res) => {
   const name = verifyName(req, res);
   if (!name) return;
-  const todo = todos.find(item => item.id === req.params.id);
+  const todo = findTodo(req.params.id);
   if (typeof todo === 'undefined') {
     return respondNotFound(res);
   }
@@ -61,7 +65,12 @@ exports.change = (req, res) => {
 };
 
 exports.delete = (req, res) => {
-  res.json(`Delete: ${req.params.id}`);
+  const todo = findTodo(req.params.id);
+  if (typeof todo === 'undefined') {
+    return respondNotFound(res);
+  }
+  todos.splice(todos.indexOf(todo), 1);
+  res.json(todo);
 };
 
 exports.toggle = (req, res) => {

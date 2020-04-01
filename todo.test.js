@@ -184,3 +184,31 @@ describe('change', () => {
     expectResponse({ error: 'Name should be a string' });
   });
 });
+
+describe('delete', () => {
+  const id = 101;
+  const name = 'jogging';
+
+  it('works', () => {
+    //create new todo
+    todo.addTodo(todo.createTodo(name, id));
+    const todos = todo.getTodos();
+    const { length } = todo.getTodos();
+    const deletedTodo = todo.getTodos().find(item => item.id === id);
+    req.params.id = id;
+
+    todo.delete(req, res);
+
+    expectStatus(200);
+    expectResponse(deletedTodo);
+    expect(todos).toHaveLength(length - 1);
+  });
+
+  it('handle case with not proper id', () => {
+    req.params.id = 'something';
+    todo.delete(req, res);
+
+    expectStatus(404);
+    expectTextResponse('Not found');
+  });
+});
